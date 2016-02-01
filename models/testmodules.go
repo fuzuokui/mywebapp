@@ -22,7 +22,8 @@ type Article struct {
 
 func init() {
 	orm.RegisterDriver("mysql", orm.DRMySQL)
-	orm.RegisterDataBase("default", "mysql", "root:123456@/bookbar?charset=utf8")
+	// orm.RegisterDataBase("default", "mysql", "root:123456@/tcp(localhost:3306)bookbar?charset=utf8")
+	orm.RegisterDataBase("default", "mysql", "cmsuser:cms@tcp(10.255.223.241:3306)/bookbar_fuzuokui?charset=utf8")
 	orm.SetMaxIdleConns("default", 30)           //设置数据库最大空闲连接
 	orm.SetMaxOpenConns("default", 30)           //设置数据库最大连接数
 	orm.RegisterModelWithPrefix("go_", new(Bar)) //注册模型并使用表前缀
@@ -42,8 +43,8 @@ func createTable() {
 
 func (this *Bar) Add(barId int, barName string, barDesc string) (int64, error) {
 	o := orm.NewOrm()
-	o.Using("bookbar") //使用数据库，默认default
-	createTable()      //开启自动建表
+	// o.Using("bookbar") //使用数据库，默认default
+	// createTable()      //开启自动建表
 	bar := Bar{BarId: barId, BarName: barName, BarDesc: barDesc}
 	id, err := o.Insert(&bar)
 	return id, err
@@ -52,6 +53,15 @@ func (this *Bar) Add(barId int, barName string, barDesc string) (int64, error) {
 func (this *Bar) QueryAllBar() ([]Bar, error) {
 	o := orm.NewOrm()
 	var data []Bar
-	_, err := o.QueryTable("go_bar").Filter("id__gt", 8).All(&data)
+	_, err := o.QueryTable("go_bar").All(&data)
+	if err == nil {
+		for i, bar := range data {
+			fmt.Print(i)
+			fmt.Print(bar.Id)
+			fmt.Print(bar.BarId)
+			fmt.Print(bar.BarName)
+			fmt.Print(bar.BarDesc + "\n")
+		}
+	}
 	return data, err
 }
